@@ -45,6 +45,15 @@ Gist に置いた SKK 個人辞書へ、手元の辞書をブラウザからド�
 | `GITHUB_TOKEN` | 未ログイン時のプレビュー・EUC-JP ダウンロードに使うトークン（任意。API のレート制限緩和用） |
 | `ADDR` | 待ち受けアドレス（既定: `:8080`） |
 
+## Docker
+
+master に push すると GitHub Actions がテスト後にイメージをビルドし、`ghcr.io/ponkotuy/skksync`（`latest` とコミット SHA のタグ）へ push する。
+SKK-JISYO.L はイメージに同梱している。
+
+```sh
+docker run -p 8080:8080 --env-file .env ghcr.io/ponkotuy/skksync:latest
+```
+
 ## 構成
 
 - `skk/` 辞書のパース・マージ・SKK-JISYO.L の除去・ソート・文字コード変換
