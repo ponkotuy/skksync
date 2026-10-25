@@ -32,11 +32,11 @@ func TestParseAndFormat(t *testing.T) {
 	want := strings.Join([]string{
 		";; -*- mode: fundamental; coding: utf-8 -*-",
 		";; okuri-ari entries.",
-		"はしr /走;run/奔/[る/走/]/[ら/走/奔/]/",
+		"はしr /奔/走;run/[ら/奔/走/]/[る/走/]/",
 		"あいs /愛/",
 		";; okuri-nasi entries.",
 		"かっこ /(/[/「/",
-		"かんじ /漢字;[注釈]/感じ/",
+		"かんじ /感じ/漢字;[注釈]/",
 		"",
 	}, "\n")
 	if got := d.Format(); got != want {
@@ -75,7 +75,7 @@ func TestMergeOrderAndAnnotation(t *testing.T) {
 	merged.Merge(local)
 	merged.Merge(gist)
 
-	if got, want := merged.Lookup(OkuriNasi, "かんじ").String(), "かんじ /感じ/漢字;注釈/幹事/"; got != want {
+	if got, want := merged.Lookup(OkuriNasi, "かんじ").String(), "かんじ /幹事/感じ/漢字;注釈/"; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 	if merged.Lookup(OkuriNasi, "ほげ") == nil {
@@ -91,8 +91,21 @@ func TestMergeBlocks(t *testing.T) {
 	a := mustParse(t, ";; okuri-ari entries.\nはしr /走/[る/走/]/\n")
 	b := mustParse(t, ";; okuri-ari entries.\nはしr /奔/[る/奔/]/[ら/走/]/\n")
 	a.Merge(b)
-	if got, want := a.Lookup(OkuriAri, "はしr").String(), "はしr /走/奔/[る/走/奔/]/[ら/走/]/"; got != want {
+	if got, want := a.Lookup(OkuriAri, "はしr").String(), "はしr /奔/走/[ら/走/]/[る/奔/走/]/"; got != want {
 		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestMergeOrderIndependent(t *testing.T) {
+	a := mustParse(t, ";; okuri-ari entries.\nはしr /走/奔/[る/走/]/[ら/走/]/\n;; okuri-nasi entries.\nかんじ /漢字/感じ/\n")
+	b := mustParse(t, ";; okuri-ari entries.\nはしr /奔/走/[ら/走/]/[る/走/]/\n;; okuri-nasi entries.\nかんじ /感じ/漢字/幹事/\n")
+	ab, ba := New(), New()
+	ab.Merge(a)
+	ab.Merge(b)
+	ba.Merge(b)
+	ba.Merge(a)
+	if ab.Format() != ba.Format() {
+		t.Errorf("merge result depends on order\n a+b:\n%s\n b+a:\n%s", ab.Format(), ba.Format())
 	}
 }
 

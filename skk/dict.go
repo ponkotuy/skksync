@@ -74,6 +74,19 @@ func (e *Entry) clone() *Entry {
 	return n
 }
 
+// sort は候補を語順、送りブロックを送り仮名順に並べる。
+func (e *Entry) sort() {
+	sortCandidates(e.Candidates)
+	sort.Slice(e.Blocks, func(i, j int) bool { return e.Blocks[i].Okuri < e.Blocks[j].Okuri })
+	for _, blk := range e.Blocks {
+		sortCandidates(blk.Candidates)
+	}
+}
+
+func sortCandidates(cs []Candidate) {
+	sort.Slice(cs, func(i, j int) bool { return cs[i].Word < cs[j].Word })
+}
+
 // Dict は送りあり・送りなしそれぞれの見出し語 → エントリの対応を持つ。
 type Dict struct {
 	sections [2]map[string]*Entry
@@ -107,13 +120,17 @@ func (d *Dict) Entries(sec Section) []*Entry {
 	return es
 }
 
-// add はエントリを取り込む。同じ見出し語が既にあれば、既存の候補の後ろに新しい候補を足す。
+// add はエントリを取り込む。同じ見出し語が既にあれば候補を統合する。
+// 取り込み順で候補の並びが変わらないよう、候補と送りブロックは常にソートしておく。
 func (d *Dict) add(sec Section, e *Entry) {
 	cur, ok := d.sections[sec][e.Headword]
 	if !ok {
-		d.sections[sec][e.Headword] = e.clone()
+		cur = e.clone()
+		d.sections[sec][e.Headword] = cur
+		cur.sort()
 		return
 	}
+	defer cur.sort()
 	cur.Candidates = mergeCandidates(cur.Candidates, e.Candidates)
 	for _, blk := range e.Blocks {
 		merged := false
@@ -151,7 +168,7 @@ func mergeCandidates(dst, src []Candidate) []Candidate {
 	return dst
 }
 
-// Merge は o の内容を d に取り込む。候補順は d が優先される。
+// Merge は o の内容を d に取り込む。同じ語の注釈は d が優先される。
 func (d *Dict) Merge(o *Dict) {
 	for sec := range o.sections {
 		for _, e := range o.sections[sec] {
