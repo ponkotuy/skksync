@@ -54,6 +54,17 @@ SKK-JISYO.L はイメージに同梱している。
 docker run -p 8080:8080 --env-file .env ghcr.io/ponkotuy/skksync:latest
 ```
 
+### systemd で自動起動する
+
+リポジトリを `/opt/skksync` に置き、`.env` を用意したうえでユニットファイルをリンクする。
+起動時に最新イメージを pull してから `docker compose up -d` する。
+
+```sh
+sudo ln -s /opt/skksync/skksync.service /etc/systemd/system/skksync.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now skksync
+```
+
 ## 構成
 
 - `skk/` 辞書のパース・マージ・SKK-JISYO.L の除去・ソート・文字コード変換
