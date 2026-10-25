@@ -9,13 +9,25 @@ import (
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/unicode"
 )
 
 var codingRe = regexp.MustCompile(`coding:\s*([A-Za-z0-9_-]+)`)
 
 // Decode は辞書ファイルのバイト列を UTF-8 文字列にする。
-// 1 行目の "coding:" 指定を優先し、指定がなければ UTF-8 として妥当かどうかで EUC-JP と判別する。
+// UTF-16 の BOM があれば UTF-16 として読む (CorvusSKK のユーザー辞書は UTF-16LE)。
+// それ以外は 1 行目の "coding:" 指定を優先し、指定がなければ UTF-8 として妥当かどうかで EUC-JP と判別する。
 func Decode(b []byte) (string, error) {
+	if bytes.HasPrefix(b, []byte("\xff\xfe")) || bytes.HasPrefix(b, []byte("\xfe\xff")) {
+		s, err := unicode.UTF16(unicode.LittleEndian, unicode.ExpectBOM).NewDecoder().String(string(b))
+		if err != nil {
+			return "", fmt.Errorf("文字コードの変換に失敗しました: %w", err)
+		}
+		if n := strings.Count(s, "�"); n > 0 {
+			return "", fmt.Errorf("UTF-16 として解釈できない文字が %d 箇所あります", n)
+		}
+		return normalizeNewlines(s), nil
+	}
 	b = bytes.TrimPrefix(b, []byte("\xef\xbb\xbf"))
 	first, _, _ := bytes.Cut(b, []byte("\n"))
 	coding := ""

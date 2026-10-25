@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/unicode"
 )
 
 func mustParse(t *testing.T, text string) *Dict {
@@ -133,6 +134,9 @@ func TestCompare(t *testing.T) {
 func TestDecode(t *testing.T) {
 	text := ";; okuri-nasi entries.\nかんじ /漢字/\n"
 	euc, _ := japanese.EUCJP.NewEncoder().String(text)
+	crlf := strings.ReplaceAll(text, "\n", "\r\n")
+	utf16le, _ := unicode.UTF16(unicode.LittleEndian, unicode.UseBOM).NewEncoder().String(crlf)
+	utf16be, _ := unicode.UTF16(unicode.BigEndian, unicode.UseBOM).NewEncoder().String(crlf)
 
 	cases := []struct {
 		name  string
@@ -142,6 +146,8 @@ func TestDecode(t *testing.T) {
 		{"utf-8 with BOM and CRLF", []byte("\xef\xbb\xbf" + strings.ReplaceAll(text, "\n", "\r\n"))},
 		{"euc-jp without header", []byte(euc)},
 		{"euc-jp with header", []byte(";; -*- coding: euc-jp -*-\n" + euc)},
+		{"utf-16le with BOM and CRLF", []byte(utf16le)},
+		{"utf-16be with BOM and CRLF", []byte(utf16be)},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
