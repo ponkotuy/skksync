@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SKK Sync</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>SKK Sync</h1>
+    <div id="account">
+      <span id="login-name"></span>
+      <form id="logout-form" method="post" action="/logout" hidden>
+        <button type="submit" class="link">ログアウト</button>
+      </form>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Gist</h2>
+      <label>Gist の URL
+        <input id="gist" type="url" placeholder="https://gist.github.com/you/0123abcd..." autocomplete="off">
+      </label>
+      <label>ファイル名 <small>（Gist にファイルが複数ある場合のみ）</small>
+        <input id="file" type="text" placeholder="SKK-JISYO.user" autocomplete="off">
+      </label>
+      <p class="hint">入力内容はこのブラウザに保存されます。新しく使うときは、適当な内容のファイルを 1 つ置いた Gist を作って URL を入れてください。</p>
+    </section>
+
+    <section>
+      <h2>2. 手元の辞書</h2>
+      <label id="dropzone">
+        <input id="files" type="file" multiple hidden>
+        <span>辞書ファイルをドロップ、またはクリックして選択</span>
+        <ul id="file-list"></ul>
+      </label>
+    </section>
+
+    <section>
+      <h2>3. 同期</h2>
+      <div class="actions">
+        <button id="sync" type="button" class="primary" disabled>Gist を更新</button>
+      </div>
+      <p id="message" role="status"></p>
+      <div id="result" hidden>
+        <table id="counts"></table>
+        <details><summary id="added-summary"></summary><pre id="added"></pre></details>
+        <details><summary id="changed-summary"></summary><pre id="changed"></pre></details>
+        <details><summary id="removed-summary"></summary><pre id="removed"></pre></details>
+      </div>
+    </section>
+
+    <section>
+      <h2>ダウンロード</h2>
+      <ul class="downloads">
+        <li>UTF-8: <a id="dl-utf8" href="#" hidden></a><span id="dl-utf8-none">プレビューすると Gist の raw URL を表示します</span></li>
+        <li>EUC-JP: <a id="dl-eucjp" href="#" hidden></a><span id="dl-eucjp-none">Gist の URL を入力してください</span></li>
+      </ul>
+      <p class="hint">どちらも常に最新の Gist の内容を返す固定 URL です。EUC-JP 版では EUC-JP で表せない候補は省略されます。</p>
+    </section>
+  </main>
+</body>
+</html>

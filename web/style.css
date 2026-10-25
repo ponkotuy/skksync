@@ -1,0 +1,114 @@
+:root {
+  --bg: #fafaf9;
+  --fg: #1c1917;
+  --muted: #78716c;
+  --border: #d6d3d1;
+  --surface: #ffffff;
+  --accent: #2563eb;
+  --accent-fg: #ffffff;
+  --error: #b91c1c;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1917;
+    --fg: #e7e5e4;
+    --muted: #a8a29e;
+    --border: #44403c;
+    --surface: #292524;
+    --accent: #60a5fa;
+    --accent-fg: #0c0a09;
+    --error: #f87171;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+header, main {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+#account { display: flex; align-items: center; gap: 0.75rem; }
+#account form { margin: 0; }
+
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.1rem; margin-top: 2rem; }
+
+label { display: block; margin-bottom: 0.75rem; }
+
+input[type="url"], input[type="text"] {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.hint { color: var(--muted); font-size: 0.875rem; }
+
+#dropzone {
+  padding: 2rem 1rem;
+  text-align: center;
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+#dropzone.over { border-color: var(--accent); }
+#file-list { list-style: none; padding: 0; margin: 0.5rem 0 0; color: var(--muted); }
+
+.actions { display: flex; gap: 0.75rem; }
+
+button {
+  padding: 0.5rem 1rem;
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+button:disabled { opacity: 0.5; cursor: default; }
+button.link { padding: 0; border: none; background: none; color: var(--accent); }
+
+#message.error { color: var(--error); }
+
+#counts { border-collapse: collapse; margin-bottom: 1rem; }
+#counts th { text-align: left; font-weight: normal; padding-right: 1.5rem; color: var(--muted); }
+#counts td { text-align: right; font-variant-numeric: tabular-nums; }
+
+details { margin-bottom: 0.5rem; }
+pre {
+  max-height: 20rem;
+  overflow: auto;
+  padding: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.downloads a { word-break: break-all; }
