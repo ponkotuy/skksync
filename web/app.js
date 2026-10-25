@@ -73,6 +73,25 @@ function updateEucjpLink() {
   link.textContent = link.href;
 }
 
+// raw URL は別オリジンで download 属性が効かないため、取得して Blob としてダウンロードさせる
+async function downloadUtf8(e) {
+  e.preventDefault();
+  const link = e.currentTarget;
+  try {
+    const res = await fetch(link.href);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const url = URL.createObjectURL(await res.blob());
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = decodeURIComponent(new URL(link.href).pathname.split("/").pop());
+    a.click();
+    // 直後に解放すると Safari でダウンロードが始まらないことがあるので少し待つ
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (err) {
+    setMessage(`ダウンロードに失敗しました: ${err}`, true);
+  }
+}
+
 function setFiles(list) {
   files = [...list];
   const ul = $("file-list");
@@ -202,6 +221,7 @@ async function init() {
     });
   }
   updateEucjpLink();
+  $("dl-utf8").addEventListener("click", downloadUtf8);
 
   const dz = $("dropzone");
   dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.classList.add("over"); });
