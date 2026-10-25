@@ -1,5 +1,6 @@
 # SKK Sync
 
+[![test](https://github.com/ponkotuy/skksync/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/ponkotuy/skksync/actions/workflows/test.yml)
 [![docker](https://github.com/ponkotuy/skksync/actions/workflows/docker.yml/badge.svg?branch=master)](https://github.com/ponkotuy/skksync/actions/workflows/docker.yml)
 
 Gist に置いた SKK 個人辞書へ、手元の辞書をブラウザからドラッグ＆ドロップでマージするサービス。
