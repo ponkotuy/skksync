@@ -204,3 +204,31 @@ func TestEncodeEUCJP(t *testing.T) {
 		t.Errorf("got:\n%s\nwant:\n%s", decoded, want)
 	}
 }
+
+func TestParseDropsInconsistentOkuri(t *testing.T) {
+	d := mustParse(t, strings.Join([]string{
+		";; okuri-ari entries.",
+		"あかu /明/[る/明/]/",
+		"たi /炊/足/[い/炊/]/[き/炊/]/[り/足/]/",
+		"わす$ /忘/[え/忘/]/",
+		"はしr /走/[る/走/]/[ら/走/]/",
+		"かんj /感/[じ/感/]/",
+		"おもt /思/[った/思/]/[う/思/]/",
+		"おもc /思/[っちゃ/思/]/",
+		"あいs /愛/",
+		"",
+	}, "\n"))
+	want := strings.Join([]string{
+		";; -*- mode: fundamental; coding: utf-8 -*-",
+		";; okuri-ari entries.",
+		"はしr /走/[ら/走/]/[る/走/]/",
+		"かんj /感/[じ/感/]/",
+		"おもc /思/[っちゃ/思/]/",
+		"あいs /愛/",
+		";; okuri-nasi entries.",
+		"",
+	}, "\n")
+	if got := d.Format(); got != want {
+		t.Errorf("Format mismatch\n got:\n%s\nwant:\n%s", got, want)
+	}
+}

@@ -209,6 +209,11 @@ func Parse(text string) (*Dict, error) {
 		if len(e.Candidates) == 0 && len(e.Blocks) == 0 {
 			continue
 		}
+		// AquaSKK のユーザ辞書には "あかu /明/[る/明/]/" のように見出し語の送り字が
+		// 送り仮名と食い違うエントリが混ざる。信用できないのでエントリごと捨てる
+		if s == OkuriAri && !okuriConsistent(e) {
+			continue
+		}
 		d.add(s, e)
 	}
 	return d, nil
@@ -343,4 +348,40 @@ func (d *Dict) filter(keep func(string) bool) (*Dict, int) {
 		}
 	}
 	return n, dropped
+}
+
+// okuriLetters は送り仮名の先頭のかなに対して、見出し語末尾の送り字として許す英字。
+var okuriLetters = func() map[rune]string {
+	m := map[rune]string{
+		'っ': "tcksp", 'ん': "n", 'じ': "jz", 'ち': "tc", 'つ': "t", 'ふ': "hf", 'し': "s",
+		'ぢ': "d", 'づ': "d", 'を': "w", 'ゔ': "v",
+	}
+	rows := map[string]string{
+		"aiueo": "あいうえお", "k": "かきくけこ", "g": "がぎぐげご", "s": "さすせそ", "z": "ざずぜぞ",
+		"t": "たてと", "d": "だでど", "n": "なにぬねの", "h": "はひへほ", "b": "ばびぶべぼ",
+		"p": "ぱぴぷぺぽ", "m": "まみむめも", "y": "やゆよ", "r": "らりるれろ", "w": "わ",
+	}
+	for letters, kana := range rows {
+		for i, k := range []rune(kana) {
+			if len(letters) == 1 {
+				m[k] = letters
+			} else {
+				m[k] = letters[i : i+1]
+			}
+		}
+	}
+	return m
+}()
+
+// okuriConsistent は送りブロックの送り仮名がすべて見出し語末尾の送り字と合うかを返す。
+// 送りブロックがなければ照合できないので合っているとみなす。
+func okuriConsistent(e *Entry) bool {
+	last, _ := utf8.DecodeLastRuneInString(e.Headword)
+	for _, blk := range e.Blocks {
+		first, _ := utf8.DecodeRuneInString(blk.Okuri)
+		if !strings.ContainsRune(okuriLetters[first], last) {
+			return false
+		}
+	}
+	return true
 }
